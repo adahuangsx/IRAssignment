@@ -1,7 +1,10 @@
 package Indexing;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,7 +50,34 @@ public class MyIndexWriter {
 			}
 			term2postingMap.get(word).add(new int[] {docNum, wordsFreq.get(word)});
 		}
+		if (docNum % this.blockSize == 0) {
+			thrash();
+		}
+	}
+	
+	private void thrash () {
 		
+	}
+	
+	private void writeTmpPostings(String path) throws IOException {
+		File file = new File(path);
+		if (file.exists()) {
+			file.delete();
+			file.createNewFile();
+		}
+		FileWriter writer = new FileWriter(file);
+		Object[] terms = term2postingMap.entrySet().toArray();
+		Arrays.sort(terms);
+		for (Object term : terms) {
+			writer.write((String)term );
+			writer.write("\n");
+			for (int[] pair : term2postingMap.get(term)) {
+				writer.write(pair[0] + " " + pair[1] + " ");
+			}
+			writer.write("\n");
+			writer.flush();
+		}
+		writer.close();		
 	}
 	
 	public void Close() throws IOException {
