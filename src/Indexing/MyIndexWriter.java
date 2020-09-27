@@ -14,8 +14,10 @@ import Classes.Path;
 public class MyIndexWriter {
 	// I suggest you to write very efficient code here, otherwise, your memory cannot hold our corpus...
 	private int docCount;
-	private int termCount;
-	private int blockSize = 100000; // the size of a "batch"
+	private int mergedTermCount; // used when merging ???
+	private static final int blockSize = 100000; // the size of a "batch"
+	private static final int termBlockSize = 10000; // the size of a term batch
+	private static final String indexFileSuffix = "_index.result";
 	
 	private String rootPath;
 	private String type;
@@ -30,7 +32,7 @@ public class MyIndexWriter {
 		// This constructor should initiate the FileWriter to output your index files
 		// remember to close files if you finish writing the index
 		docCount = 0;
-		termCount = 0;
+		mergedTermCount = 0;
 		term2postingMap = new HashMap<>();
 		docID2numMap = new HashMap<>();
 		tmpfileNames = new ArrayList<>();
@@ -64,15 +66,16 @@ public class MyIndexWriter {
 			}
 			term2postingMap.get(word).add(new int[] {docNum, wordsFreq.get(word)});
 		}
-		if (docNum % this.blockSize == 0) {
+		if (docNum % blockSize == 0) {
 			thrash();
 		}
 	}
 	
 	/**
 	 * output the current map data and re-init the map
+	 * @throws IOException 
 	 */
-	private void thrash () {
+	private void thrash () throws IOException {
 		if (term2postingMap.size() == 0) {
 			return;
 		}
@@ -81,7 +84,9 @@ public class MyIndexWriter {
 		int blockNum = docCount / blockSize;
 		String tmpfileName = blockNum + ".tmp";
 		tmpfileNames.add(tmpfileName);
-		writeTmpPostings(rootPath.)
+		writeTmpPostings(rootPath + tmpfileName);
+		// re-init the Map
+		term2postingMap = new HashMap<>();
 	}
 	/**
 	 * 
@@ -109,9 +114,32 @@ public class MyIndexWriter {
 		writer.close();		
 	}
 	
+	/**
+	 * 
+	 * @return The current token batch file. generate a file called "1_index.result"
+	 * @throws IOException 
+	 */
+	private FileWriter getNewTokenIndexWriter() throws IOException {
+		File file = new File(rootPath + (mergedTermCount / termBlockSize) + indexFileSuffix);
+		if (file.exists()) {
+			file.delete();
+			file.createNewFile();
+		}
+		return new FileWriter(file);
+	}
+	
+	private void mergeTmp() throws IOException {
+		FileWriter writer = getNewTokenIndexWriter();
+		
+	}
+	
 	public void Close() throws IOException {
 		// close the index writer, and you should output all the buffered content (if any).
 		// if you write your index into several files, you need to fuse them here.
+		thrash(); // get a few rest done
+		mergeTmp();
+		deleteTmpfile();
+		
 	}
 	
 }
