@@ -28,7 +28,7 @@ public class PreProcessedCorpusReader {
 		int max = 100;
 		while ((line = reader.readLine()) != null && max > 0) {
 			String docNo = line.trim();
-			String content = reader.readLine();
+			char[] content = reader.readLine().toCharArray();
 			res.put(docNo, content);
 			return res;
 		}  

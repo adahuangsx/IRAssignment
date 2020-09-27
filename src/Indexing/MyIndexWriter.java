@@ -16,7 +16,7 @@ public class MyIndexWriter {
 	private int docCount;
 	private int mergedTermCount; // used when merging ???
 	private static final int blockSize = 100000; // the size of a "batch"
-	private static final int termBlockSize = 10000; // the size of a term batch
+	private static final int termBlockSize = 1000; // the size of a term batch
 	private static final String indexFileSuffix = "_index.result";
 	
 	private String rootPath;
@@ -100,10 +100,10 @@ public class MyIndexWriter {
 			file.createNewFile();
 		}
 		FileWriter writer = new FileWriter(file);
-		Object[] terms = term2postingMap.entrySet().toArray();
+		Object[] terms = term2postingMap.keySet().toArray();
 		Arrays.sort(terms);
 		for (Object term : terms) {
-			writer.write((String)term );
+			writer.write((String) term);
 			writer.write("\n");
 			for (int[] pair : term2postingMap.get(term)) {
 				writer.write(pair[0] + " " + pair[1] + " ");
@@ -188,7 +188,7 @@ public class MyIndexWriter {
 	
 	private void deleteTmpfiles() {
 		for (String tmpfileName : tmpfileNames) {
-			new File(tmpfileName).delete();
+			new File(rootPath + tmpfileName).delete();
 		}
 	}
 	
@@ -197,7 +197,7 @@ public class MyIndexWriter {
 		// if you write your index into several files, you need to fuse them here.
 		thrash(); // get a few rest done
 		mergeTmp();
-		deleteTmpfiles();
+//		deleteTmpfiles();
 		
 	}
 	
@@ -207,10 +207,12 @@ public class MyIndexWriter {
 		MyIndexWriter w = new MyIndexWriter(filetype);
 		Map<String, Object> doc = null;
 		int i = 0;
-		while ((doc = t.NextDocument()) != null && i < 500) {
+		while ((doc = t.NextDocument()) != null) {
 			String docNo = doc.keySet().iterator().next();
-			
+			char[] content = (char[]) doc.get(docNo);
+			w.IndexADocument(docNo, content);
+			i++;
 		}
-		
+		w.Close();
 	}
 }
