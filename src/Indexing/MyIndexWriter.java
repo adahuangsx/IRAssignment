@@ -202,6 +202,15 @@ public class MyIndexWriter {
 	}
 	
 	public static void main(String[] args) throws Exception {
+		String filetype = "trecweb";
+		PreProcessedCorpusReader t = new PreProcessedCorpusReader(filetype);
+		MyIndexWriter w = new MyIndexWriter(filetype);
+		Map<String, Object> doc = null;
+		int i = 0;
+		while ((doc = t.NextDocument()) != null && i < 500) {
+			String docNo = doc.keySet().iterator().next();
+			
+		}
 		
 	}
 }
