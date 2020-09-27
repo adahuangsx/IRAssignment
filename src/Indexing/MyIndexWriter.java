@@ -130,7 +130,66 @@ public class MyIndexWriter {
 	
 	private void mergeTmp() throws IOException {
 		FileWriter writer = getNewTokenIndexWriter();
-		
+		List<PostingFileReader> readers = new ArrayList<>();
+		for (String tmpfileName : tmpfileNames) {
+			readers.add(new PostingFileReader(rootPath + tmpfileName));
+		}
+		String prevToken = null; //  to mark the last processed token.
+		while (true) {
+			String minToken = null;
+			PostingFileReader minReader = null;
+			
+			// go thru all the posting files to find the min token (like "aaa")
+			for (PostingFileReader reader : readers) {
+				String crtToken = reader.getCrtToken();
+				if (crtToken != null) {
+					if (minToken == null || (minToken != null && crtToken.compareTo(minToken) < 0)) {
+						minReader = reader;
+						minToken = crtToken;
+					}
+				}
+			}
+			if (minReader == null) {
+				// fail to locate a min token, which means the content is run out.
+				break;
+			}
+			if (minToken.equals(prevToken)) {
+				/**
+				 * This happens when the minToken in tmp1 also exists in, say, tmp2.
+				 * Currently tmp2 is the minReader, and the token in tmp2 is the minToken:
+				 * Then I only need to concat the tmp2's postinglist.
+				 */
+				writer.write(minReader.getCrtPosting() + " ");
+				writer.flush();
+			}
+			else {
+				/**
+				 * This happens when a new token is being processed.
+				 * The writer needs to be the next, and close the last.
+				 */
+				if (prevToken != null) {
+					writer.write("\n");
+				}
+				mergedTermCount++;
+				if (mergedTermCount % termBlockSize == 0) {
+					writer.close();
+					writer = getNewTokenIndexWriter();
+				}
+				writer.write(minToken + "\n");
+				writer.write(minReader.getCrtPosting() + " ");
+				writer.flush();
+				prevToken = minToken;
+			}
+			minReader.getNextTokenInfo(); // who small, who moves forward.
+		}
+		// The break happens when the content is run out. Then close the current writer.
+		writer.close();
+	}
+	
+	private void deleteTmpfiles() {
+		for (String tmpfileName : tmpfileNames) {
+			new File(tmpfileName).delete();
+		}
 	}
 	
 	public void Close() throws IOException {
@@ -138,8 +197,11 @@ public class MyIndexWriter {
 		// if you write your index into several files, you need to fuse them here.
 		thrash(); // get a few rest done
 		mergeTmp();
-		deleteTmpfile();
+		deleteTmpfiles();
 		
 	}
 	
+	public static void main(String[] args) throws Exception {
+		
+	}
 }
