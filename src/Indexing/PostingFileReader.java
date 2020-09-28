@@ -29,11 +29,11 @@ public class PostingFileReader {
 		String token = null;
 		String posting = null;
 		String line = null;
-		while ((line = reader.readLine()) != null) {
+		while ((token == null || posting == null) && (line = reader.readLine()) != null) {
 			if (token == null) {
 				token = line;
 			}
-			else if (posting == null) {
+			else {
 				posting = line;
 			}
 		}

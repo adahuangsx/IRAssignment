@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import Classes.Path;
 
@@ -18,13 +19,16 @@ public class MyIndexWriter {
 	private static final int blockSize = 100000; // the size of a "batch"
 	private static final int termBlockSize = 1000; // the size of a term batch
 	private static final String indexFileSuffix = "_index.result";
+	private static final String docIDFileName = "docIDMap.map";
+	private static final String termFileIDName = "termFileID.map";
 	
 	private String rootPath;
 	private String type;
 	
 	// <term, [docNum, freq]> map:
 	private Map<String, List<int[]>> term2postingMap;
-	private Map<String, Integer> docID2numMap;
+	private Map<String, Integer> docID2numMap; // <"XINHUA000000101", 56>
+	private Map<String, Integer> term2fileMap; // <"abc", 1(1.tmp)>
 	private List<String> tmpfileNames;
 	
 	
@@ -35,6 +39,7 @@ public class MyIndexWriter {
 		mergedTermCount = 0;
 		term2postingMap = new HashMap<>();
 		docID2numMap = new HashMap<>();
+		term2fileMap = new HashMap<>();
 		tmpfileNames = new ArrayList<>();
 		this.type = type;
 		if (type.equals("trectext")) {
@@ -56,8 +61,13 @@ public class MyIndexWriter {
 		int docNum = docID2numMap.get(docno);
 		// a word frequency statistics in this document
 		Map<String, Integer> wordsFreq = new HashMap<>();
-		for (String word : String.valueOf(content).split("//s+")) {
-			wordsFreq.put(word, wordsFreq.getOrDefault(word, 0) + 1);
+		for (String word : String.valueOf(content).split("\\s+")) {
+			if (word.length() > 0) {
+				wordsFreq.put(word, wordsFreq.getOrDefault(word, 0) + 1);
+			}
+			else {
+				System.out.print("a word is empty. docno: " + docno);
+			}
 		}
 		// add these data into the main map
 		for (String word : wordsFreq.keySet()) {
@@ -66,7 +76,7 @@ public class MyIndexWriter {
 			}
 			term2postingMap.get(word).add(new int[] {docNum, wordsFreq.get(word)});
 		}
-		if (docNum % blockSize == 0) {
+		if ((docNum + 1) % blockSize == 0) {
 			thrash();
 		}
 	}
@@ -75,12 +85,12 @@ public class MyIndexWriter {
 	 * output the current map data and re-init the map
 	 * @throws IOException 
 	 */
-	private void thrash () throws IOException {
+	private void thrash() throws IOException {
 		if (term2postingMap.size() == 0) {
 			return;
 		}
-		System.out.println("term2postingMap.size():" + term2postingMap.size());
-		System.out.println("docCount" + docCount);
+		System.out.println("term2postingMap.size(): " + term2postingMap.size());
+		System.out.println("docCount: " + docCount);
 		int blockNum = docCount / blockSize;
 		String tmpfileName = blockNum + ".tmp";
 		tmpfileNames.add(tmpfileName);
@@ -167,13 +177,16 @@ public class MyIndexWriter {
 				 * This happens when a new token is being processed.
 				 * The writer needs to be the next, and close the last.
 				 */
-				if (prevToken != null) {
-					writer.write("\n");
-				}
+				
 				mergedTermCount++;
+				this.term2fileMap.put(minToken, mergedTermCount / termBlockSize);
 				if (mergedTermCount % termBlockSize == 0) {
 					writer.close();
 					writer = getNewTokenIndexWriter();
+					prevToken = null;
+				}
+				if (prevToken != null) {
+					writer.write("\n");
 				}
 				writer.write(minToken + "\n");
 				writer.write(minReader.getCrtPosting() + " ");
@@ -192,12 +205,30 @@ public class MyIndexWriter {
 		}
 	}
 	
+	private void writeMap(String path, Map<String, Integer> map) throws IOException {
+        File file = new File(path);
+		file.delete();
+		file.createNewFile();
+        FileWriter writer = new FileWriter(file);
+        for (Map.Entry<String, Integer> entry : map.entrySet()) {
+        	writer.write((String) entry.getKey());
+        	writer.write(" " + entry.getValue());
+        	writer.write("\n");
+        	writer.flush();
+        }
+        writer.close();
+	}
+	
 	public void Close() throws IOException {
 		// close the index writer, and you should output all the buffered content (if any).
 		// if you write your index into several files, you need to fuse them here.
 		thrash(); // get a few rest done
 		mergeTmp();
-//		deleteTmpfiles();
+		deleteTmpfiles();
+		writeMap(rootPath + termFileIDName, term2fileMap);
+		writeMap(rootPath + docIDFileName, docID2numMap);
+		System.out.println("term count:" + mergedTermCount);
+		
 		
 	}
 	
