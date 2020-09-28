@@ -16,11 +16,11 @@ public class MyIndexWriter {
 	// I suggest you to write very efficient code here, otherwise, your memory cannot hold our corpus...
 	private int docCount;
 	private int mergedTermCount; // used when merging ???
-	private static final int blockSize = 100000; // the size of a "batch"
+	private static final int blockSize = 120000; // the size of a "batch"
 	private static final int termBlockSize = 1000; // the size of a term batch
-	private static final String indexFileSuffix = "_index.result";
-	private static final String docIDFileName = "docIDMap.map";
-	private static final String termFileIDName = "termFileID.map";
+	static final String indexFileSuffix = "_index.result";
+	static final String docIDFileName = "docIDMap.map";
+	static final String termFileIDName = "termFileID.map";
 	
 	private String rootPath;
 	private String type;
@@ -65,9 +65,9 @@ public class MyIndexWriter {
 			if (word.length() > 0) {
 				wordsFreq.put(word, wordsFreq.getOrDefault(word, 0) + 1);
 			}
-			else {
-				System.out.print("a word is empty. docno: " + docno);
-			}
+//			else {
+//				System.out.print("a word is empty. docno: " + docno);
+//			}
 		}
 		// add these data into the main map
 		for (String word : wordsFreq.keySet()) {
@@ -89,8 +89,8 @@ public class MyIndexWriter {
 		if (term2postingMap.size() == 0) {
 			return;
 		}
-		System.out.println("term2postingMap.size(): " + term2postingMap.size());
-		System.out.println("docCount: " + docCount);
+//		System.out.println("term2postingMap.size(): " + term2postingMap.size());
+//		System.out.println("docCount: " + docCount);
 		int blockNum = docCount / blockSize;
 		String tmpfileName = blockNum + ".tmp";
 		tmpfileNames.add(tmpfileName);
@@ -177,7 +177,9 @@ public class MyIndexWriter {
 				 * This happens when a new token is being processed.
 				 * The writer needs to be the next, and close the last.
 				 */
-				
+				if(minToken.equals("acow")) {
+					System.out.println("FOUND IT!");
+				}
 				mergedTermCount++;
 				this.term2fileMap.put(minToken, mergedTermCount / termBlockSize);
 				if (mergedTermCount % termBlockSize == 0) {
