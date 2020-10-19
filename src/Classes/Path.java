@@ -10,4 +10,6 @@ public class Path {
 
 	public static String IndexTextDir = "data//indextext//";//address of generated Text index file
 	public static String IndexWebDir = "data//indexweb//";//address of generated Web index file
+	
+	public static String TopicDir="data//topics.txt";//address of topics.txt
 }
