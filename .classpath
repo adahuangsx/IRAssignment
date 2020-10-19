@@ -2,5 +2,9 @@
 <classpath>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
 	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="lib" path="D:/Fall 2020/INFSCI 2140 INFORMATION RETRIEVAL/Assignment 3 - Java/lib/lucene-analyzers-common-6.3.0.jar"/>
+	<classpathentry kind="lib" path="D:/Fall 2020/INFSCI 2140 INFORMATION RETRIEVAL/Assignment 3 - Java/lib/lucene-backward-codecs-6.3.0.jar"/>
+	<classpathentry kind="lib" path="D:/Fall 2020/INFSCI 2140 INFORMATION RETRIEVAL/Assignment 3 - Java/lib/lucene-core-6.3.0.jar"/>
+	<classpathentry kind="lib" path="D:/Fall 2020/INFSCI 2140 INFORMATION RETRIEVAL/Assignment 3 - Java/lib/lucene-queryparser-6.3.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
