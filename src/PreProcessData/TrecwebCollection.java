@@ -106,12 +106,23 @@ public class TrecwebCollection implements DocumentCollection {
 //		int end = line.indexOf(DOC_NUMBER_END);
 //		System.out.println(line.substring(start, end));
 		
-		String a = "";
-		System.out.print(a == null);
-		int i = 1200;
-		String aa = Integer.toString(i);
-		aa = "0021";
-		char[] cc = new char[] {'0','0','1'};
-		System.out.println(String.valueOf(cc));
+//		String a = "";
+//		System.out.print(a == null);
+//		int i = 1200;
+//		String aa = Integer.toString(i);
+//		aa = "0021";
+//		char[] cc = new char[] {'0','0','1'};
+//		System.out.println(String.valueOf(cc));
+		
+		// read docset.XXX
+		String line = null;
+		BufferedReader rd = new BufferedReader(new FileReader(Path.DataTextDir));
+		int i = 100;
+		while ((line = rd.readLine()) != null) {
+			System.out.println(line);
+			if (i-- <= 0) {
+				break;
+			}
+		}
 	}
 }

@@ -8,6 +8,9 @@ import java.util.List;
 
 import Classes.Path;
 import Classes.Query;
+import PreProcessData.StopWordRemover;
+import PreProcessData.WordNormalizer;
+import PreProcessData.WordTokenizer;
 
 public class ExtractQuery {
 	
@@ -56,9 +59,14 @@ public class ExtractQuery {
 				content.append(desc);
 				content.append(" ");
 				content.append(narr);
+				// normalize it
+				return new Query(content.toString(), normalizeQuery(content.toString().toCharArray()), queryNum);
 			}
 			else if (isTopic && line.startsWith(NUM)) {
 				queryNum = line.substring(NUM.length()).trim();
+			}
+			else if (isTopic && line.startsWith(TITLE)) {
+				title = line.substring(TITLE.length()).trim();
 			}
 			else if (isTopic && line.startsWith(DESCRI)) {
 				isDesc = true;
@@ -68,7 +76,7 @@ public class ExtractQuery {
 			else if (isTopic && line.startsWith(NARRI)) {
 				isDesc = false;
 				isNarr = true;
-				desc = new StringBuilder(line.substring(NARRI.length()).trim());
+				narr = new StringBuilder(line.substring(NARRI.length()).trim());
 			}
 			else if (isTopic && isDesc) {
 				desc.append(line.trim());
@@ -76,6 +84,42 @@ public class ExtractQuery {
 			else if (isTopic && isNarr) {
 				narr.append(line.trim());
 			}
+		}
+		endOfFile = true;
+		reader.close();
+		return null;
+	}
+	
+	private String normalizeQuery(char[] content) {
+		// loading stopword list and initiate the StopWordRemover and WordNormalizer class
+		StopWordRemover stopwordRemoverObj = new StopWordRemover();
+		WordNormalizer normalizerObj = new WordNormalizer();
+		WordTokenizer tokenizer = new WordTokenizer(content);
+		StringBuilder sb = new StringBuilder();
+		// initiate a word object, which can hold a word
+		char[] word = null;
+		// process the document word by word iteratively
+		while ((word = tokenizer.nextWord()) != null) {
+			// each word is transformed into lowercase
+			word = normalizerObj.lowercase(word);
+
+			// filter out stopword, and only non-stopword will be written
+			// into result file
+			if (!stopwordRemoverObj.isStopword(word)) {
+				sb.append(normalizerObj.stem(word) + " ");
+				//stemmed format of each word is written into result file
+			}
+			
+		}
+		return sb.toString();
+	}
+	
+	public static void main(String[] args) throws Exception {
+		ExtractQuery t = new ExtractQuery();
+		Query q = null;
+		while (t.hasNext()) {
+			q = t.next();
+			System.out.println(q);
 		}
 	}
 }
