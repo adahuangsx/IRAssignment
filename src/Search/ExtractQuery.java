@@ -71,12 +71,12 @@ public class ExtractQuery {
 			else if (isTopic && line.startsWith(DESCRI)) {
 				isDesc = true;
 				isNarr = false;
-				desc = new StringBuilder(line.substring(DESCRI.length()).trim());
+				desc = new StringBuilder();
 			}
 			else if (isTopic && line.startsWith(NARRI)) {
 				isDesc = false;
 				isNarr = true;
-				narr = new StringBuilder(line.substring(NARRI.length()).trim());
+				narr = new StringBuilder();
 			}
 			else if (isTopic && isDesc) {
 				desc.append(line.trim());
