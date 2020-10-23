@@ -29,6 +29,19 @@ public class QueryRetrievalModel {
 		// NT: you will find our IndexingLucene.Myindexreader provides method: docLength()
 		// implement your retrieval model here, and for each input query, return the topN retrieved documents
 		// sort the docs based on their relevance score, from high to low
+		
+		List<String> queryNorm = aQuery.getQueryNorm();
+		for (String term : queryNorm) {
+			int[][] posting = indexReader.getPostingList(term);
+			if (posting != null) {
+				for (int i = 0; i < posting.length; i++) {
+					int docId = posting[i][0];
+					
+				}
+			}
+		}
+		
+		
 		return null;
 	}
 	

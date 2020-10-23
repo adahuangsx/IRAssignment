@@ -3,6 +3,7 @@
 
 # Log file
 *.log
+*.classpath
 /data/
 *.DS_Store
 /.settings/

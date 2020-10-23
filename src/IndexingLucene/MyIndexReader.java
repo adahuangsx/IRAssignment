@@ -48,7 +48,7 @@ public class MyIndexReader {
 	public int getDocid( String docno ) throws IOException {
 		// you should implement this method.
 		Query query = new TermQuery(new Term("DOCNO", docno));
-		TopDocs tops= isearcher.search(query,1);
+		TopDocs tops = isearcher.search(query, 1);
 		return tops.scoreDocs[0].doc;
 	}
 	
@@ -62,7 +62,7 @@ public class MyIndexReader {
 	public String getDocno( int docid ) throws IOException {
 		// you should implement this method.
 		Document doc = ireader.document(docid);
-		return (doc==null)?null:doc.get("DOCNO");
+		return (doc == null) ? null : doc.get("DOCNO");
 	}
 
 	

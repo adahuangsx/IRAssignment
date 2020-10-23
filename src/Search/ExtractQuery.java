@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import Classes.Path;
@@ -90,12 +91,12 @@ public class ExtractQuery {
 		return null;
 	}
 	
-	private String normalizeQuery(char[] content) {
+	private List<String> normalizeQuery(char[] content) {
 		// loading stopword list and initiate the StopWordRemover and WordNormalizer class
 		StopWordRemover stopwordRemoverObj = new StopWordRemover();
 		WordNormalizer normalizerObj = new WordNormalizer();
 		WordTokenizer tokenizer = new WordTokenizer(content);
-		StringBuilder sb = new StringBuilder();
+		List<String> res = new ArrayList<>();
 		// initiate a word object, which can hold a word
 		char[] word = null;
 		// process the document word by word iteratively
@@ -106,12 +107,12 @@ public class ExtractQuery {
 			// filter out stopword, and only non-stopword will be written
 			// into result file
 			if (!stopwordRemoverObj.isStopword(word)) {
-				sb.append(normalizerObj.stem(word) + " ");
+				res.add(normalizerObj.stem(word));
 				//stemmed format of each word is written into result file
 			}
 			
 		}
-		return sb.toString();
+		return res;
 	}
 	
 	public static void main(String[] args) throws Exception {
