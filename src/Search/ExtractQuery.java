@@ -26,20 +26,30 @@ public class ExtractQuery {
 	
 	private BufferedReader reader;
 	
-	private boolean endOfFile = false;
+//	private boolean endOfFile = false;
+	// this doesn't work because null Query may be return.
+	
+	private int index;
+	private List<Query> queries;
 
-	public ExtractQuery() throws FileNotFoundException {
+	public ExtractQuery() throws Exception {
 		//you should extract the 4 queries from the Path.TopicDir
 		//NT: the query content of each topic should be 1) tokenized, 2) to lowercase, 3) remove stop words, 4) stemming
 		//NT: you can simply pick up title only for query, or you can also use title + description + narrative for the query content.
 		reader = new BufferedReader(new FileReader(Path.TopicDir));
+		queries = getAllQueries();
+		index = 0;
 	}
 	
 	public boolean hasNext() {
-		return !endOfFile;
+		return index < queries.size();
+	}
+	public Query next() {
+		return queries.get(index++);
 	}
 	
-	public Query next() throws IOException{
+	private List<Query> getAllQueries() throws IOException{
+		List<Query> res = new ArrayList<>();
 		String line = null;
 		boolean isTopic = false;
 		boolean isDesc = false;
@@ -48,13 +58,14 @@ public class ExtractQuery {
 		String queryNum = null;
 		StringBuilder desc = null;
 		StringBuilder narr = null;
-		StringBuilder content = new StringBuilder();
+		StringBuilder content = null;
 		while ((line = reader.readLine()) != null) {
 			if (line.trim().equals(TOP_START)) {
 				isTopic = true;
 			}
 			else if (line.trim().equals(TOP_END)) {
 				isTopic = false;
+				content = new StringBuilder();
 				content.append(title);
 //				content.append(" ");
 //				content.append(desc);
@@ -62,7 +73,7 @@ public class ExtractQuery {
 //				content.append(narr);
 				
 				// normalize it
-				return new Query(content.toString(), normalizeQuery(content.toString().toCharArray()), queryNum);
+				res.add(new Query(content.toString(), normalizeQuery(content.toString().toCharArray()), queryNum));
 			}
 			else if (isTopic && line.startsWith(NUM)) {
 				queryNum = line.substring(NUM.length()).trim();
@@ -87,9 +98,8 @@ public class ExtractQuery {
 				narr.append(line.trim());
 			}
 		}
-		endOfFile = true;
 		reader.close();
-		return null;
+		return res;
 	}
 	
 	private List<String> normalizeQuery(char[] content) {

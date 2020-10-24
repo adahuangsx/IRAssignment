@@ -97,7 +97,7 @@ public class QueryRetrievalModel {
 		return (count_wD + mu * P_wC) / (abs_D + mu);
 	}
 	
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws Exception {
 		// Open index
 		MyIndexReader ixreader = new MyIndexReader("trectext");
 		// Initialize the MyRetrievalModel
@@ -107,7 +107,14 @@ public class QueryRetrievalModel {
 			Query aQuery = queries.next();
 			System.out.println(aQuery);
 			List<Document> results = model.retrieveQuery(aQuery, 2);
-			System.out.println(results.size());
 		}
+		
+		// test Dysphagia
+		String word = "Dysphagia";
+		long count_wC = ixreader.CollectionFreq(word); // count of this word in the whole collection
+		long count_C = ixreader.CollectionSize(); // the whole collection word count
+		double P_wC = count_wC / count_C;
+		int abs_D = ixreader.docLength(1); // the length of this doc
+		System.out.println((0 + model.mu * P_wC) / (abs_D + model.mu));
 	}
 }
