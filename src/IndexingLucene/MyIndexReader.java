@@ -22,6 +22,7 @@ import org.apache.lucene.util.BytesRef;
  * A class for reading your index.
  */
 public class MyIndexReader {
+	private int REF;
 	protected File dir;
 	private Directory directory;
 	private DirectoryReader ireader;
@@ -35,6 +36,12 @@ public class MyIndexReader {
 		}
 		ireader = DirectoryReader.open(directory);
 		isearcher = new IndexSearcher(ireader);
+		int size = 0;
+		for(int i = 0; i < ireader.numDocs(); i++){
+			
+			size += docLength(i);
+		}
+		REF = size;
 	}
 	
 	/**
@@ -172,13 +179,14 @@ public class MyIndexReader {
 	 * @throws IOException
 	 */
 	public long CollectionSize() throws IOException {
-		return this.ireader.getSumTotalTermFreq("CONTENT"); // this is much faster.
+//		return this.ireader.getSumTotalTermFreq("CONTENT"); // this is much faster.
 //		int size = 0;
 //		for(int i = 0; i < ireader.numDocs(); i++){
 //			
 //			size += docLength(i);
 //		}
 //		return size;
+		return REF;
 	}
 	
 	public void close() throws IOException {
