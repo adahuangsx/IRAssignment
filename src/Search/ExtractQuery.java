@@ -56,10 +56,11 @@ public class ExtractQuery {
 			else if (line.trim().equals(TOP_END)) {
 				isTopic = false;
 				content.append(title);
-				content.append(" ");
-				content.append(desc);
-				content.append(" ");
-				content.append(narr);
+//				content.append(" ");
+//				content.append(desc);
+//				content.append(" ");
+//				content.append(narr);
+				
 				// normalize it
 				return new Query(content.toString(), normalizeQuery(content.toString().toCharArray()), queryNum);
 			}

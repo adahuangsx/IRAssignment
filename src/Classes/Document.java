@@ -1,6 +1,6 @@
 package Classes;
 
-public class Document {
+public class Document implements Comparable<Document> {
 	
 	protected String docid;
 	protected String docno;
@@ -34,6 +34,12 @@ public class Document {
 	
 	public void setScore( double score ) {
 		this.score = score;
+	}
+
+	@Override
+	public int compareTo(Document o) {
+		// TODO Auto-generated method stub
+		return this.score > o.score ? -1 : 1;
 	}
 	
 }

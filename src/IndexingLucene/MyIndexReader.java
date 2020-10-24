@@ -155,6 +155,9 @@ public class MyIndexReader {
 	public int docLength( int docid ) throws IOException {
 		int doc_length = 0;
 		Terms vector = ireader.getTermVector( docid, "CONTENT" );
+		if (vector == null) {
+			return doc_length;
+		}
 		TermsEnum termsEnum = vector.iterator();
 		BytesRef text;
 		while ((text = termsEnum.next()) != null) {
@@ -163,10 +166,41 @@ public class MyIndexReader {
 		return doc_length;
 	}
 	
+	/**
+	 * Added by hsx
+	 * @return
+	 * @throws IOException
+	 */
+	public long CollectionSize() throws IOException {
+		return this.ireader.getSumTotalTermFreq("CONTENT"); // this is much faster.
+//		int size = 0;
+//		for(int i = 0; i < ireader.numDocs(); i++){
+//			
+//			size += docLength(i);
+//		}
+//		return size;
+	}
+	
 	public void close() throws IOException {
 		// you should implement this method when necessary
 		ireader.close();
 		directory.close();
 	}
 	
+	public static void main(String[] args) throws Exception {
+		// to test lucene lib
+		String type1 = "trectext";
+		String type2 = "trecweb";
+		MyIndexReader t = new MyIndexReader(type1);
+		System.out.println(t.ireader.getSumTotalTermFreq("CONTENT")); // 138431496
+		System.out.println(t.ireader.getDocCount("CONTENT"));
+		System.out.println(t.ireader.getSumDocFreq("CONTENT"));
+		int colLen = 0;
+		for(int i = 0; i < t.ireader.numDocs(); i++){ // 0-503473
+			
+			colLen += t.docLength(i);
+		}
+		System.out.println(colLen);  // 138431496
+				
+	}
 }
