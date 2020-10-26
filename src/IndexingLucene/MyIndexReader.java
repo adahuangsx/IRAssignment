@@ -179,7 +179,7 @@ public class MyIndexReader {
 	 * @throws IOException
 	 */
 	public long CollectionSize() throws IOException {
-//		return this.ireader.getSumTotalTermFreq("CONTENT"); // this is much faster.
+//		return this.ireader.getSumTotalTermFreq("CONTENT"); // this is a fast function, but not allowed.
 //		int size = 0;
 //		for(int i = 0; i < ireader.numDocs(); i++){
 //			

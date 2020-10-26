@@ -61,10 +61,29 @@ public class QueryRetrievalModel {
 				Integer count_wD = docToTermCountMap.get(docId).get(term);
 				if (count_wD != null) {
 					double dirichletSmoothingProb = Dirichlet(term, docId, count_wD);
-					score *= dirichletSmoothingProb;
+					if (dirichletSmoothingProb > 0.0) {
+						score *= dirichletSmoothingProb; // non-appearing words are dropped.
+					}		 
 				} else {
-					score = 0;
+					if (indexReader.CollectionFreq(term) == 0) {
+						// non-appeared word
+					}
+					else {
+						double dirichletSmoothingProb = Dirichlet(term, docId, 0);
+						if (dirichletSmoothingProb > 0.0) {
+							score *= dirichletSmoothingProb; // non-appearing words are dropped.
+						}	
+						// PROBLEM HERE.
+						// code above produce answer that seems not right
+						// INSTEAD:
+						// score = 0;
+					}
 				}
+//				count_wD = count_wD == null ? 0 : count_wD;
+//				double dirichletSmoothingProb = Dirichlet(term, docId, count_wD);
+//				if (dirichletSmoothingProb > 0.0) {
+//					score *= dirichletSmoothingProb; // non-appearing words are dropped.
+//				}
 			}
 			Document doc = new Document(String.valueOf(docId), indexReader.getDocno(docId), score);
 			int cnt = TopN;
@@ -94,6 +113,7 @@ public class QueryRetrievalModel {
 		long count_C = indexReader.CollectionSize(); // the whole collection word count
 		double P_wC = count_wC / count_C;
 		int abs_D = indexReader.docLength(docId); // the length of this doc
+
 		return (count_wD + mu * P_wC) / (abs_D + mu);
 	}
 	
@@ -103,14 +123,14 @@ public class QueryRetrievalModel {
 		// Initialize the MyRetrievalModel
 		QueryRetrievalModel model = new QueryRetrievalModel(ixreader);
 		ExtractQuery queries = new ExtractQuery();
-		while (queries.hasNext()) {
-			Query aQuery = queries.next();
-			System.out.println(aQuery);
-			List<Document> results = model.retrieveQuery(aQuery, 2);
-		}
+//		while (queries.hasNext()) {
+//			Query aQuery = queries.next();
+//			System.out.println(aQuery);
+//			List<Document> results = model.retrieveQuery(aQuery, 2);
+//		}
 		
 		// test Dysphagia
-		String word = "Dysphagia";
+		String word = "dysphagia";
 		long count_wC = ixreader.CollectionFreq(word); // count of this word in the whole collection
 		long count_C = ixreader.CollectionSize(); // the whole collection word count
 		double P_wC = count_wC / count_C;
