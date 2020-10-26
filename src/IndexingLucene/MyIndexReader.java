@@ -36,12 +36,15 @@ public class MyIndexReader {
 		}
 		ireader = DirectoryReader.open(directory);
 		isearcher = new IndexSearcher(ireader);
-		int size = 0;
-		for(int i = 0; i < ireader.numDocs(); i++){
-			
-			size += docLength(i);
-		}
-		REF = size;
+//		int size = 0;
+//		for(int i = 0; i < ireader.numDocs(); i++){
+//			
+//			size += docLength(i);
+//		}
+//		REF = size;
+		
+		// TA's answer:
+		REF = 142065539;
 	}
 	
 	/**

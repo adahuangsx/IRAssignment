@@ -37,7 +37,7 @@ public class ExtractQuery {
 		//NT: the query content of each topic should be 1) tokenized, 2) to lowercase, 3) remove stop words, 4) stemming
 		//NT: you can simply pick up title only for query, or you can also use title + description + narrative for the query content.
 		reader = new BufferedReader(new FileReader(Path.TopicDir));
-		queries = getAllQueries();
+		queries = getAllQueries(); // not a good practice...
 		index = 0;
 	}
 	
@@ -114,14 +114,13 @@ public class ExtractQuery {
 		while ((word = tokenizer.nextWord()) != null) {
 			// each word is transformed into lowercase
 			word = normalizerObj.lowercase(word);
-
+			
 			// filter out stopword, and only non-stopword will be written
 			// into result file
 			if (!stopwordRemoverObj.isStopword(word)) {
 				res.add(normalizerObj.stem(word));
 				//stemmed format of each word is written into result file
 			}
-			
 		}
 		return res;
 	}

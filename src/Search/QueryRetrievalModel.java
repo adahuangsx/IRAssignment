@@ -17,8 +17,6 @@ public class QueryRetrievalModel {
 	protected MyIndexReader indexReader;
 	
 	private double mu = 2000.0; // the mu in Dirichlet smoothing formula
-//	private long REF; // whole collection size
-	
 	
 	public QueryRetrievalModel(MyIndexReader ixreader) {
 		indexReader = ixreader;
@@ -33,7 +31,6 @@ public class QueryRetrievalModel {
 	 * @param TopN The maximum number of returned document
 	 * @return
 	 */
-	
 	public List<Document> retrieveQuery( Query aQuery, int TopN ) throws IOException {
 		// NT: you will find our IndexingLucene.Myindexreader provides method: docLength()
 		// implement your retrieval model here, and for each input query, return the topN retrieved documents
@@ -42,7 +39,6 @@ public class QueryRetrievalModel {
 		List<String> queryNorm = aQuery.getQueryNorm();
 		for (String term : queryNorm) {
 			int[][] posting = indexReader.getPostingList(term);
-//			int count_wD = 0; 
 			if (posting != null) {
 				for (int i = 0; i < posting.length; i++) {
 					int docId = posting[i][0];
@@ -53,34 +49,13 @@ public class QueryRetrievalModel {
 					docToTermCountMap.get(docId).put(term, count_wD);
 				}
 			}
-			
 		}
-		PriorityQueue<Document> heap = new PriorityQueue<>(TopN);
+		// get inverted map [doc -> term, freq]
+		PriorityQueue<Document> heap = new PriorityQueue<>(TopN); // get top-K problem
 		for (Integer docId : docToTermCountMap.keySet()) {
 			double score = 1.0;
 			for (String term : queryNorm) {
 				Integer count_wD = docToTermCountMap.get(docId).get(term);
-//				if (count_wD != null) {
-//					double dirichletSmoothingProb = Dirichlet(term, docId, count_wD);
-////					if (dirichletSmoothingProb > 0.0) {
-//						score *= dirichletSmoothingProb; // non-appearing words are dropped.
-////					}
-//				} else {
-//					if (indexReader.CollectionFreq(term) == 0) {
-//						// non-appeared word
-//					}
-//					else {
-//						double dirichletSmoothingProb = Dirichlet(term, docId, 0);
-////						if (dirichletSmoothingProb > 0.0) {
-////							System.out.println(term);
-//							score *= dirichletSmoothingProb; // non-appearing words are dropped.
-////						}	
-//						// PROBLEM HERE.
-//						// code above produce answer that seems not right
-//						// INSTEAD:
-//						// score = 0;
-//					}
-//				}
 				count_wD = count_wD == null ? 0 : count_wD;
 				double dirichletSmoothingProb = Dirichlet(term, docId, count_wD);
 				if (dirichletSmoothingProb > 0.0) {
@@ -101,16 +76,16 @@ public class QueryRetrievalModel {
 			cnt--;
 		}
 		List<Document> res = new ArrayList<>();
-		for (int i = 0; i < TopN; i++) {
+		for (int i = 0; i < Math.min(TopN, heap.size()); i++) {
 			res.add(heap.poll());
 		}
 		return res;
 	}
 	
+	/**
+	 * formula: P(w|D) = [count(w, D) + mu * P(w|C)] / (|D| + mu)
+	 */
 	private double Dirichlet(String word, int docId, int count_wD) throws IOException {
-		/**
-		 * formula: P(w|D) = [count(w, D) + mu * P(w|C)] / (|D| + mu)
-		 */
 		long count_wC = indexReader.CollectionFreq(word); // count of this word in the whole collection
 		long count_C = indexReader.CollectionSize(); // the whole collection word count
 		double P_wC = ((double)count_wC) / count_C;
