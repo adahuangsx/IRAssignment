@@ -39,6 +39,9 @@ public class Document implements Comparable<Document> {
 	@Override
 	public int compareTo(Document o) {
 		// TODO Auto-generated method stub
+		if (this.score == o.score) {
+			return 0;
+		}
 		return this.score > o.score ? -1 : 1;
 	}
 	

@@ -2,6 +2,7 @@ package Search;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,11 +42,11 @@ public class QueryRetrievalModel {
 		List<String> queryNorm = aQuery.getQueryNorm();
 		for (String term : queryNorm) {
 			int[][] posting = indexReader.getPostingList(term);
-			int count_wD = 0; 
+//			int count_wD = 0; 
 			if (posting != null) {
 				for (int i = 0; i < posting.length; i++) {
 					int docId = posting[i][0];
-					count_wD = posting[i][1];
+					int count_wD = posting[i][1];
 					if (!docToTermCountMap.containsKey(docId)) {
 						docToTermCountMap.put(docId, new HashMap<>());
 					}
@@ -59,31 +60,32 @@ public class QueryRetrievalModel {
 			double score = 1.0;
 			for (String term : queryNorm) {
 				Integer count_wD = docToTermCountMap.get(docId).get(term);
-				if (count_wD != null) {
-					double dirichletSmoothingProb = Dirichlet(term, docId, count_wD);
-					if (dirichletSmoothingProb > 0.0) {
-						score *= dirichletSmoothingProb; // non-appearing words are dropped.
-					}		 
-				} else {
-					if (indexReader.CollectionFreq(term) == 0) {
-						// non-appeared word
-					}
-					else {
-						double dirichletSmoothingProb = Dirichlet(term, docId, 0);
-						if (dirichletSmoothingProb > 0.0) {
-							score *= dirichletSmoothingProb; // non-appearing words are dropped.
-						}	
-						// PROBLEM HERE.
-						// code above produce answer that seems not right
-						// INSTEAD:
-						// score = 0;
-					}
-				}
-//				count_wD = count_wD == null ? 0 : count_wD;
-//				double dirichletSmoothingProb = Dirichlet(term, docId, count_wD);
-//				if (dirichletSmoothingProb > 0.0) {
-//					score *= dirichletSmoothingProb; // non-appearing words are dropped.
+//				if (count_wD != null) {
+//					double dirichletSmoothingProb = Dirichlet(term, docId, count_wD);
+////					if (dirichletSmoothingProb > 0.0) {
+//						score *= dirichletSmoothingProb; // non-appearing words are dropped.
+////					}
+//				} else {
+//					if (indexReader.CollectionFreq(term) == 0) {
+//						// non-appeared word
+//					}
+//					else {
+//						double dirichletSmoothingProb = Dirichlet(term, docId, 0);
+////						if (dirichletSmoothingProb > 0.0) {
+////							System.out.println(term);
+//							score *= dirichletSmoothingProb; // non-appearing words are dropped.
+////						}	
+//						// PROBLEM HERE.
+//						// code above produce answer that seems not right
+//						// INSTEAD:
+//						// score = 0;
+//					}
 //				}
+				count_wD = count_wD == null ? 0 : count_wD;
+				double dirichletSmoothingProb = Dirichlet(term, docId, count_wD);
+				if (dirichletSmoothingProb > 0.0) {
+					score *= dirichletSmoothingProb; // non-appearing words are dropped.
+				}
 			}
 			Document doc = new Document(String.valueOf(docId), indexReader.getDocno(docId), score);
 			int cnt = TopN;
@@ -111,11 +113,13 @@ public class QueryRetrievalModel {
 		 */
 		long count_wC = indexReader.CollectionFreq(word); // count of this word in the whole collection
 		long count_C = indexReader.CollectionSize(); // the whole collection word count
-		double P_wC = count_wC / count_C;
+		double P_wC = ((double)count_wC) / count_C;
 		int abs_D = indexReader.docLength(docId); // the length of this doc
-
-		return (count_wD + mu * P_wC) / (abs_D + mu);
+		double res = (count_wD + mu * P_wC) / (abs_D + mu);
+		return res;
 	}
+	
+
 	
 	public static void main(String[] args) throws Exception {
 		// Open index
