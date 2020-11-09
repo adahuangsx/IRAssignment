@@ -40,7 +40,7 @@ public class WordTokenizer {
 	}
 
 	public static void main(String[] args) throws Exception {
-		String arr = "I am a ... 1,200 35a..4test";
+		String arr = "I'm a ... 1,200 35a..4test";
 		WordTokenizer wt = new WordTokenizer(arr.toCharArray());
 		char[] word;
 		while ((word = wt.nextWord()) != null) {

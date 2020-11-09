@@ -15,6 +15,10 @@ public class Query {
 		this.topicId = id;
 	}
 	
+	public Query() {
+		
+	}
+	
 	public String GetQueryContent() {
 		return queryContent;
 	}
