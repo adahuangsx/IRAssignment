@@ -2,7 +2,9 @@ package PseudoRFSearch;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import Classes.Document;
 import Classes.Query;
@@ -13,6 +15,7 @@ import SearchLucene.*;
 public class PseudoRFRetrievalModel {
 
 	MyIndexReader ixreader;
+	private static final int mu = 2000;
 
 	public PseudoRFRetrievalModel(MyIndexReader ixreader)
 	{
@@ -49,11 +52,46 @@ public class PseudoRFRetrievalModel {
 
 	public HashMap<String,Double> GetTokenRFScore(Query aQuery,  int TopK) throws Exception
 	{
-		// for each token in the query, you should calculate token's score in feedback documents: P(token|feedback documents)
+		// for each token in the query, you should calculate token's score in feedback documents: 
+		// P(token|feedback documents)
 		// use Dirichlet smoothing
 		// save <token, score> in HashMap TokenRFScore, and return it
-		HashMap<String,Double> TokenRFScore=new HashMap<String,Double>();
-
+		HashMap<String,Double> TokenRFScore = new HashMap<String,Double>();
+		
+		// In HW4, the queries are all normalized.
+		String[] tokens = aQuery.GetQueryContent().split("\\s+");
+		Set<Integer> docIDs = new HashSet<>();
+		
+		// to get feedback docs
+		QueryRetrievalModel model = new QueryRetrievalModel(this.ixreader);
+		List<Document> feedbkDocs = model.retrieveQuery(aQuery, TopK);
+		int totalLen = 0; // top K documents' total length
+		for (Document doc : feedbkDocs) {
+			int docid = Integer.parseInt(doc.docid());
+			totalLen += this.ixreader.docLength(docid);
+			docIDs.add(docid);
+		}
+		
+		// to get count(token, doc)
+		for (String token : tokens) {
+			int cw_D = 0;
+			int cw_C = 0;
+			int[][] postingList = this.ixreader.getPostingList(token);
+			for (int[] pair : postingList) {
+				int docid = pair[0];
+				int freq = pair[1];
+				if (docIDs.contains(docid)) {
+					cw_D += freq;
+				}
+				cw_C += freq;
+			}
+			// calculate the dirichlet smoothing
+			double pw_C = (double) cw_C / totalLen;
+			double prob = (double)(cw_D + this.mu * pw_C) / (totalLen + this.mu); // formula
+			
+			TokenRFScore.put(token, prob);
+		}
+		
 		return TokenRFScore;
 	}
 
