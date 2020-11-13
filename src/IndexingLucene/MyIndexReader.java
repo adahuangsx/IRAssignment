@@ -22,7 +22,7 @@ import org.apache.lucene.util.BytesRef;
  * A class for reading your index.
  */
 public class MyIndexReader {
-	private int REF;
+	public int REF;
 	protected File dir;
 	private Directory directory;
 	private DirectoryReader ireader;
